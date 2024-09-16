@@ -1,73 +1,79 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   View,
   Text,
-  FlatList,
   Image,
-  StyleSheet,
+  FlatList,
   TouchableOpacity,
+  StyleSheet,
+  Dimensions,
 } from "react-native";
-import { getCategories } from "../../components/db";
+import useDatabase from "../../components/db"; // Đảm bảo đường dẫn đúng với vị trí của db.js
+import { categoryImages } from "../../components/imageAssets"; // Import đối tượng mapping
 
 const MainScreen = ({ navigation }) => {
-  const [categories, setCategories] = useState([]);
+  const { categories } = useDatabase(); // Lấy danh sách các danh mục từ db.js
 
-  useEffect(() => {
-    getCategories((result) => {
-      console.log("Categories data:", result);
-      setCategories(result);
-    });
-  }, []);
+  // Hàm xử lý khi nhấn vào một danh mục
+  const handlePress = (category) => {
+    navigation.navigate("DetailScreen", { categoryId: category.id }); // Chuyển tới màn hình chi tiết
+  };
 
-  const renderCategoryItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.gridItem}
-      onPress={() => navigation.navigate("MealDetail", { categoryId: item.id })}
-    >
-      <View style={styles.categoryContainer}>
-        <Image source={{ uri: item.image }} style={styles.categoryImage} />
-        <Text style={styles.categoryTitle}>{item.name}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+  // Render một mục danh mục
+  const renderItem = ({ item }) => {
+    // Loại bỏ phần mở rộng tệp từ item.image
+    const imageKey = item.image.replace(/\.[^/.]+$/, "");
+    const image = categoryImages[imageKey];
+
+    return (
+      <TouchableOpacity
+        style={styles.itemContainer}
+        onPress={() => handlePress(item)}
+      >
+        <Image source={image} style={styles.image} resizeMode="cover" />
+        <Text style={styles.title}>{item.title}</Text>
+      </TouchableOpacity>
+    );
+  };
 
   return (
-    <FlatList
-      data={categories}
-      keyExtractor={(item) => item.id.toString()}
-      renderItem={renderCategoryItem}
-      numColumns={2}
-    />
+    <View style={styles.container}>
+      <FlatList
+        data={categories}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id.toString()}
+        numColumns={2} // Hiển thị 2 cột
+        columnWrapperStyle={styles.row} // Thêm style cho các hàng
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  gridItem: {
+  container: {
     flex: 1,
-    margin: 10,
-    height: 150,
+    padding: 10,
   },
-  categoryContainer: {
+  itemContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
+    margin: 5,
+    borderRadius: 8,
+    overflow: "hidden",
     backgroundColor: "#f5f5f5",
-    shadowColor: "black",
-    shadowOpacity: 0.26,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 10,
     elevation: 3,
   },
-  categoryImage: {
+  image: {
     width: "100%",
-    height: "70%",
-    borderRadius: 10,
+    height: 150, // Tăng chiều cao để ảnh rõ hơn
   },
-  categoryTitle: {
-    fontSize: 18,
-    marginVertical: 5,
+  title: {
+    padding: 10,
+    fontSize: 16,
+    fontWeight: "bold",
     textAlign: "center",
+  },
+  row: {
+    justifyContent: "space-between",
   },
 });
 

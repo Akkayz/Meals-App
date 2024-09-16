@@ -1,26 +1,56 @@
-import * as SQLite from "expo-sqlite/legacy";
+import { useState, useEffect } from "react";
+import * as FileSystem from "expo-file-system";
+import * as Asset from "expo-asset";
+import * as SQLite from "expo-sqlite/legacy"; // Sử dụng thư viện expo-sqlite/legacy
 
-const db = SQLite.openDatabase({ name: "mealsApp.db", location: "default" });
+const useDatabase = () => {
+  const [db, setDb] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [dbExists, setDbExists] = useState(false);
 
-export const getCategories = (callback) => {
-  db.transaction((tx) => {
-    tx.executeSql(
-      "SELECT * FROM categories",
-      [],
-      (txObj, resultSet) => {
-        console.log(resultSet.rows._array); // Để kiểm tra dữ liệu trả về
-        if (callback) {
-          callback(resultSet.rows._array);
-        }
-      },
-      (txObj, error) => {
-        console.log("Error: ", error);
+  useEffect(() => {
+    const copyDatabase = async () => {
+      const dbUri = `${FileSystem.documentDirectory}SQLite/mealsApp.db`;
+
+      // Kiểm tra xem cơ sở dữ liệu đã tồn tại chưa
+      const dbFile = await FileSystem.getInfoAsync(dbUri);
+      if (!dbFile.exists) {
+        // Sao chép tệp cơ sở dữ liệu từ thư mục assets vào thư mục tài liệu của ứng dụng
+        await FileSystem.makeDirectoryAsync(
+          `${FileSystem.documentDirectory}SQLite`,
+          { intermediates: true }
+        );
+        const asset = Asset.fromModule(require("../assets/mealsApp.db"));
+        await FileSystem.downloadAsync(asset.uri, dbUri);
       }
-    );
-  });
+
+      // Mở cơ sở dữ liệu
+      const database = SQLite.openDatabase("mealsApp.db");
+      setDb(database);
+      setDbExists(true);
+    };
+
+    copyDatabase();
+  }, []);
+
+  useEffect(() => {
+    if (!dbExists || !db) return;
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM categories",
+        [],
+        (_, { rows: { _array } }) => {
+          setCategories(_array);
+        },
+        (tx, error) => {
+          console.error("Error fetching categories: ", error);
+        }
+      );
+    });
+  }, [dbExists, db]);
+
+  return { categories };
 };
 
-// Gọi hàm getCategories để kiểm tra
-getCategories((data) => {
-  console.log("Data from getCategories:", data);
-});
+export default useDatabase;
