@@ -6,6 +6,7 @@ import * as SQLite from "expo-sqlite/legacy"; // Sử dụng thư viện expo-sq
 const useDatabase = () => {
   const [db, setDb] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [meals, setMeals] = useState([]);
   const [dbExists, setDbExists] = useState(false);
 
   useEffect(() => {
@@ -50,7 +51,26 @@ const useDatabase = () => {
     });
   }, [dbExists, db]);
 
-  return { categories };
+  const getMealsByCategory = (categoryId) => {
+    return new Promise((resolve, reject) => {
+      if (!dbExists || !db) return;
+
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM meals WHERE categoryId = ?",
+          [categoryId],
+          (_, { rows: { _array } }) => {
+            resolve(_array);
+          },
+          (tx, error) => {
+            reject(error);
+          }
+        );
+      });
+    });
+  };
+
+  return { categories, getMealsByCategory };
 };
 
 export default useDatabase;

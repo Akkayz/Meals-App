@@ -15,6 +15,7 @@ const MainScreen = ({ navigation }) => {
   const { categories } = useDatabase(); // Lấy danh sách các danh mục từ db.js
 
   // Hàm xử lý khi nhấn vào một danh mục
+  // screens/HomeScreen/MainScreen.js
   const handlePress = (category) => {
     navigation.navigate("DetailScreen", { categoryId: category.id }); // Chuyển tới màn hình chi tiết
   };
