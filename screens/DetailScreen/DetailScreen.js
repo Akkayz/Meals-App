@@ -1,49 +1,46 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  FlatList,
   Image,
+  FlatList,
   StyleSheet,
-  ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import useDatabase from "../../components/db"; // Đảm bảo đường dẫn đúng với vị trí của db.js
+import { mealImages } from "../../components/imageAssets"; // Import đối tượng mapping
 
 const DetailScreen = ({ route }) => {
-  const { categoryId } = route.params;
-  const { getMealsByCategory } = useDatabase();
+  const { categoryId } = route.params; // Lấy ID danh mục từ params
   const [meals, setMeals] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { getMealsByCategory } = useDatabase(); // Lấy dữ liệu món ăn từ db.js
 
   useEffect(() => {
     const fetchMeals = async () => {
       try {
-        const fetchedMeals = await getMealsByCategory(categoryId);
-        setMeals(fetchedMeals);
+        const mealsData = await getMealsByCategory(categoryId);
+        setMeals(mealsData);
       } catch (error) {
         console.error("Error fetching meals: ", error);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchMeals();
   }, [categoryId, getMealsByCategory]);
 
-  const renderItem = ({ item }) => (
-    <View style={styles.itemContainer}>
-      <Image source={{ uri: item.image }} style={styles.image} />
-      <Text style={styles.title}>{item.title}</Text>
-    </View>
-  );
+  const renderItem = ({ item }) => {
+    // Loại bỏ phần mở rộng tệp từ item.image
+    const imageKey = item.image.replace(/\.[^/.]+$/, "");
+    // Lấy ảnh từ mealImages hoặc sử dụng ảnh mặc định nếu không tìm thấy
+    const image = mealImages[imageKey] || mealImages["default-image"];
 
-  if (loading) {
     return (
-      <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#0000ff" />
+      <View style={styles.itemContainer}>
+        <Image source={image} style={styles.image} resizeMode="cover" />
+        <Text style={styles.title}>{item.title}</Text>
       </View>
     );
-  }
+  };
 
   return (
     <View style={styles.container}>
@@ -51,6 +48,8 @@ const DetailScreen = ({ route }) => {
         data={meals}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
+        numColumns={2} // Hiển thị 2 cột
+        columnWrapperStyle={styles.row} // Thêm style cho các hàng
       />
     </View>
   );
@@ -61,27 +60,26 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
   },
-  loader: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   itemContainer: {
-    marginBottom: 10,
+    flex: 1,
+    margin: 5,
     borderRadius: 8,
     overflow: "hidden",
     backgroundColor: "#f5f5f5",
     elevation: 3,
-    padding: 10,
   },
   image: {
     width: "100%",
-    height: 150,
+    height: 150, // Tăng chiều cao để ảnh rõ hơn
   },
   title: {
-    marginTop: 10,
+    padding: 10,
     fontSize: 16,
     fontWeight: "bold",
+    textAlign: "center",
+  },
+  row: {
+    justifyContent: "space-between",
   },
 });
 
