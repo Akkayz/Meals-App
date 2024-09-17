@@ -18,7 +18,7 @@ const MainStack = () => (
   <Stack.Navigator
     initialRouteName="MainScreen"
     screenOptions={{
-      headerShown: false,
+      headerShown: true,
     }}
   >
     <Stack.Screen name="MainScreen" component={MainScreen} />
@@ -73,7 +73,7 @@ const App = () => {
       <Drawer.Navigator
         initialRouteName="Home"
         screenOptions={{
-          headerShown: false,
+          headerShown: true,
         }}
       >
         <Drawer.Screen name="Home" component={BottomTabNavigator} />

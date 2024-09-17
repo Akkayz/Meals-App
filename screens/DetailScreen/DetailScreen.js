@@ -7,13 +7,18 @@ import {
   StyleSheet,
   Dimensions,
 } from "react-native";
-import useDatabase from "../../components/db"; // Đảm bảo đường dẫn đúng với vị trí của db.js
-import { mealImages } from "../../components/imageAssets"; // Import đối tượng mapping
+import useDatabase from "../../components/db";
+import { mealImages } from "../../components/imageAssets";
 
-const DetailScreen = ({ route }) => {
-  const { categoryId } = route.params; // Lấy ID danh mục từ params
+const DetailScreen = ({ route, navigation }) => {
+  const { categoryId, categoryTitle } = route.params; // Lấy cả ID và tên danh mục từ params
   const [meals, setMeals] = useState([]);
-  const { getMealsByCategory } = useDatabase(); // Lấy dữ liệu món ăn từ db.js
+  const { getMealsByCategory } = useDatabase();
+
+  useEffect(() => {
+    // Đặt tiêu đề động cho màn hình chi tiết dựa trên tên danh mục
+    navigation.setOptions({ title: categoryTitle });
+  }, [navigation, categoryTitle]);
 
   useEffect(() => {
     const fetchMeals = async () => {
@@ -29,9 +34,7 @@ const DetailScreen = ({ route }) => {
   }, [categoryId, getMealsByCategory]);
 
   const renderItem = ({ item }) => {
-    // Loại bỏ phần mở rộng tệp từ item.image
     const imageKey = item.image.replace(/\.[^/.]+$/, "");
-    // Lấy ảnh từ mealImages hoặc sử dụng ảnh mặc định nếu không tìm thấy
     const image = mealImages[imageKey] || mealImages["default-image"];
 
     return (
@@ -48,8 +51,8 @@ const DetailScreen = ({ route }) => {
         data={meals}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        numColumns={2} // Hiển thị 2 cột
-        columnWrapperStyle={styles.row} // Thêm style cho các hàng
+        numColumns={2}
+        columnWrapperStyle={styles.row}
       />
     </View>
   );
@@ -70,7 +73,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: "100%",
-    height: 150, // Tăng chiều cao để ảnh rõ hơn
+    height: 150,
   },
   title: {
     padding: 10,

@@ -17,8 +17,12 @@ const MainScreen = ({ navigation }) => {
   // Hàm xử lý khi nhấn vào một danh mục
   // screens/HomeScreen/MainScreen.js
   const handlePress = (category) => {
-    navigation.navigate("DetailScreen", { categoryId: category.id }); // Chuyển tới màn hình chi tiết
+    navigation.navigate("DetailScreen", {
+      categoryId: category.id,
+      categoryTitle: category.title, // Truyền tên danh mục sang DetailScreen
+    });
   };
+
 
   // Render một mục danh mục
   const renderItem = ({ item }) => {
