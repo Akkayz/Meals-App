@@ -7,17 +7,19 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  useColorScheme, // Import useColorScheme để phát hiện chế độ sáng/tối
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import useDatabase from "../../components/db";
 import { mealImages } from "../../components/imageAssets";
-import Icon from "react-native-vector-icons/Ionicons"; // Import icon
+import Icon from "react-native-vector-icons/Ionicons";
 
 const DetailScreen = ({ route, navigation }) => {
-  const { categoryId, categoryTitle } = route.params; // Lấy ID và tên danh mục từ params
+  const { categoryId, categoryTitle } = route.params;
   const [meals, setMeals] = useState([]);
   const [favoriteMeals, setFavoriteMeals] = useState([]);
   const { getMealsByCategory } = useDatabase();
+  const colorScheme = useColorScheme(); // Xác định chế độ sáng/tối
 
   useEffect(() => {
     navigation.setOptions({ title: categoryTitle });
@@ -46,23 +48,19 @@ const DetailScreen = ({ route, navigation }) => {
     fetchFavoriteMeals();
   }, [categoryId, getMealsByCategory]);
 
-  // Kiểm tra xem món ăn có trong danh sách yêu thích không
   const isFavorite = (mealId) => {
     return favoriteMeals.some((favMeal) => favMeal.id === mealId);
   };
 
-  // Hàm xử lý thêm hoặc xóa món ăn yêu thích
   const toggleFavoriteMeal = async (meal) => {
     try {
       let updatedFavorites = [];
       if (isFavorite(meal.id)) {
-        // Xóa món ăn khỏi yêu thích nếu đã tồn tại
         updatedFavorites = favoriteMeals.filter(
           (favMeal) => favMeal.id !== meal.id
         );
         Alert.alert("Thông báo", "Đã xóa khỏi yêu thích.");
       } else {
-        // Thêm món ăn vào yêu thích
         updatedFavorites = [...favoriteMeals, meal];
         Alert.alert("Thông báo", "Đã thêm vào yêu thích.");
       }
@@ -78,25 +76,42 @@ const DetailScreen = ({ route, navigation }) => {
     const image = mealImages[imageKey] || mealImages["default-image"];
 
     return (
-      <View style={styles.itemContainer}>
+      <View
+        style={[
+          styles.itemContainer,
+          { backgroundColor: colorScheme === "dark" ? "#333" : "#f5f5f5" },
+        ]}
+      >
         <Image source={image} style={styles.image} resizeMode="cover" />
         <TouchableOpacity
           style={styles.heartIcon}
           onPress={() => toggleFavoriteMeal(item)}
         >
           <Icon
-            name={isFavorite(item.id) ? "heart" : "heart-outline"} // Biểu tượng trái tim đầy hoặc viền
+            name={isFavorite(item.id) ? "heart" : "heart-outline"}
             size={30}
             color="tomato"
           />
         </TouchableOpacity>
-        <Text style={styles.title}>{item.title}</Text>
+        <Text
+          style={[
+            styles.title,
+            { color: colorScheme === "dark" ? "#fff" : "#000" },
+          ]}
+        >
+          {item.title}
+        </Text>
       </View>
     );
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colorScheme === "dark" ? "#000" : "#fff" },
+      ]}
+    >
       <FlatList
         data={meals}
         renderItem={renderItem}
@@ -118,7 +133,6 @@ const styles = StyleSheet.create({
     margin: 5,
     borderRadius: 8,
     overflow: "hidden",
-    backgroundColor: "#f5f5f5",
     elevation: 3,
   },
   image: {

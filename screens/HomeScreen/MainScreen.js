@@ -6,49 +6,60 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  Dimensions,
+  useColorScheme, // Import useColorScheme để phát hiện chế độ sáng/tối
 } from "react-native";
-import useDatabase from "../../components/db"; // Đảm bảo đường dẫn đúng với vị trí của db.js
-import { categoryImages } from "../../components/imageAssets"; // Import đối tượng mapping
+import useDatabase from "../../components/db";
+import { categoryImages } from "../../components/imageAssets";
 
 const MainScreen = ({ navigation }) => {
-  const { categories } = useDatabase(); // Lấy danh sách các danh mục từ db.js
+  const { categories } = useDatabase();
+  const colorScheme = useColorScheme(); // Xác định chế độ sáng/tối
 
-  // Hàm xử lý khi nhấn vào một danh mục
-  // screens/HomeScreen/MainScreen.js
   const handlePress = (category) => {
     navigation.navigate("DetailScreen", {
       categoryId: category.id,
-      categoryTitle: category.title, // Truyền tên danh mục sang DetailScreen
+      categoryTitle: category.title,
     });
   };
 
-
-  // Render một mục danh mục
   const renderItem = ({ item }) => {
-    // Loại bỏ phần mở rộng tệp từ item.image
     const imageKey = item.image.replace(/\.[^/.]+$/, "");
     const image = categoryImages[imageKey];
 
     return (
       <TouchableOpacity
-        style={styles.itemContainer}
+        style={[
+          styles.itemContainer,
+          { backgroundColor: colorScheme === "dark" ? "#333" : "#f5f5f5" },
+        ]}
         onPress={() => handlePress(item)}
       >
         <Image source={image} style={styles.image} resizeMode="cover" />
-        <Text style={styles.title}>{item.title}</Text>
+        <Text
+          style={[
+            styles.title,
+            { color: colorScheme === "dark" ? "#fff" : "#000" },
+          ]}
+        >
+          {item.title}
+        </Text>
       </TouchableOpacity>
     );
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colorScheme === "dark" ? "#000" : "#fff" },
+      ]}
+    >
       <FlatList
         data={categories}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        numColumns={2} // Hiển thị 2 cột
-        columnWrapperStyle={styles.row} // Thêm style cho các hàng
+        numColumns={2}
+        columnWrapperStyle={styles.row}
       />
     </View>
   );
@@ -64,12 +75,11 @@ const styles = StyleSheet.create({
     margin: 5,
     borderRadius: 8,
     overflow: "hidden",
-    backgroundColor: "#f5f5f5",
     elevation: 3,
   },
   image: {
     width: "100%",
-    height: 150, // Tăng chiều cao để ảnh rõ hơn
+    height: 150,
   },
   title: {
     padding: 10,

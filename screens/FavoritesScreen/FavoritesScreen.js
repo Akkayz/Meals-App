@@ -7,14 +7,15 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  useColorScheme, // Import useColorScheme để phát hiện chế độ sáng/tối
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { mealImages } from "../../components/imageAssets"; // Import hình ảnh món ăn
+import { mealImages } from "../../components/imageAssets";
 
 const FavoritesScreen = () => {
   const [favoriteMeals, setFavoriteMeals] = useState([]);
+  const colorScheme = useColorScheme(); // Xác định chế độ sáng/tối
 
-  // Lấy danh sách món ăn yêu thích từ AsyncStorage
   const fetchFavoriteMeals = async () => {
     try {
       const favorites = await AsyncStorage.getItem("favorites");
@@ -28,7 +29,6 @@ const FavoritesScreen = () => {
     fetchFavoriteMeals();
   }, []);
 
-  // Hàm xóa món ăn khỏi danh sách yêu thích
   const removeFavoriteMeal = async (mealId) => {
     try {
       const updatedFavorites = favoriteMeals.filter(
@@ -47,9 +47,21 @@ const FavoritesScreen = () => {
     const image = mealImages[imageKey] || mealImages["default-image"];
 
     return (
-      <View style={styles.itemContainer}>
+      <View
+        style={[
+          styles.itemContainer,
+          { backgroundColor: colorScheme === "dark" ? "#333" : "#f5f5f5" },
+        ]}
+      >
         <Image source={image} style={styles.image} resizeMode="cover" />
-        <Text style={styles.title}>{item.title}</Text>
+        <Text
+          style={[
+            styles.title,
+            { color: colorScheme === "dark" ? "#fff" : "#000" },
+          ]}
+        >
+          {item.title}
+        </Text>
         <TouchableOpacity
           style={styles.removeButton}
           onPress={() => removeFavoriteMeal(item.id)}
@@ -61,14 +73,18 @@ const FavoritesScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colorScheme === "dark" ? "#000" : "#fff" },
+      ]}
+    >
       <FlatList
         data={favoriteMeals}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
         columnWrapperStyle={styles.row}
-        ListEmptyComponent={<Text>Không có món ăn yêu thích nào.</Text>}
       />
     </View>
   );
@@ -84,7 +100,6 @@ const styles = StyleSheet.create({
     margin: 5,
     borderRadius: 8,
     overflow: "hidden",
-    backgroundColor: "#f5f5f5",
     elevation: 3,
   },
   image: {
@@ -98,14 +113,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   removeButton: {
-    backgroundColor: "red",
+    backgroundColor: "tomato",
     padding: 10,
-    marginTop: 5,
     borderRadius: 5,
+    alignItems: "center",
+    margin: 10,
   },
   removeButtonText: {
     color: "#fff",
-    textAlign: "center",
     fontWeight: "bold",
   },
   row: {

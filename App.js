@@ -1,5 +1,9 @@
-import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import React, { useContext } from "react";
+import {
+  NavigationContainer,
+  DefaultTheme,
+  DarkTheme,
+} from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -8,6 +12,7 @@ import DetailScreen from "./screens/DetailScreen/DetailScreen";
 import FavoritesScreen from "./screens/FavoritesScreen/FavoritesScreen";
 import SettingsScreen from "./screens/SettingsScreen/SettingsScreen";
 import { Ionicons } from "@expo/vector-icons"; // Thư viện để thêm icon vào Tab
+import { ThemeContext, ThemeProvider } from "./components/ThemeContext"; // Import ThemeContext
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -68,8 +73,10 @@ const BottomTabNavigator = () => {
 
 // Drawer Navigator
 const App = () => {
+  const { theme } = useContext(ThemeContext); // Lấy theme từ ThemeContext
+
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={theme === "dark" ? DarkTheme : DefaultTheme}>
       <Drawer.Navigator
         initialRouteName="Home"
         screenOptions={{
@@ -84,4 +91,8 @@ const App = () => {
   );
 };
 
-export default App;
+export default () => (
+  <ThemeProvider>
+    <App />
+  </ThemeProvider>
+);
