@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, Switch } from "react-native";
 import { ThemeContext } from "../../components/ThemeContext"; // Đường dẫn đúng
 
 const SettingsScreen = () => {
-  const { theme, toggleTheme } = useContext(ThemeContext); // Lấy trạng thái theme và toggleTheme từ context
+  const { theme, toggleTheme, headerShown, toggleHeaderShown } =
+    useContext(ThemeContext); // Thêm headerShown và toggleHeaderShown
 
   const isDarkMode = theme === "dark"; // Kiểm tra theme hiện tại
 
@@ -17,6 +18,8 @@ const SettingsScreen = () => {
       <Text style={[styles.title, { color: isDarkMode ? "#fff" : "#000" }]}>
         Cài đặt
       </Text>
+
+      {/* Chuyển đổi Dark/Light Mode */}
       <View style={styles.row}>
         <Text style={[styles.text, { color: isDarkMode ? "#fff" : "#000" }]}>
           Chế độ Dark/Light Mode
@@ -24,6 +27,17 @@ const SettingsScreen = () => {
         <Switch
           value={isDarkMode}
           onValueChange={toggleTheme} // Chuyển đổi theme khi bật/tắt
+        />
+      </View>
+
+      {/* Bật/tắt headerShown */}
+      <View style={styles.row}>
+        <Text style={[styles.text, { color: isDarkMode ? "#fff" : "#000" }]}>
+          Hiển thị thanh tiêu đề
+        </Text>
+        <Switch
+          value={headerShown}
+          onValueChange={toggleHeaderShown} // Chuyển đổi header khi bật/tắt
         />
       </View>
     </View>

@@ -1,3 +1,4 @@
+// App.js
 import React, { useContext } from "react";
 import {
   NavigationContainer,
@@ -11,28 +12,54 @@ import MainScreen from "./screens/HomeScreen/MainScreen";
 import DetailScreen from "./screens/DetailScreen/DetailScreen";
 import FavoritesScreen from "./screens/FavoritesScreen/FavoritesScreen";
 import SettingsScreen from "./screens/SettingsScreen/SettingsScreen";
-import { Ionicons } from "@expo/vector-icons"; // Thư viện để thêm icon vào Tab
-import { ThemeContext, ThemeProvider } from "./components/ThemeContext"; // Import ThemeContext
+import { Ionicons } from "@expo/vector-icons";
+import { ThemeContext, ThemeProvider } from "./components/ThemeContext";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 
-// Stack Navigator cho "Danh mục"
-const MainStack = () => (
-  <Stack.Navigator
-    initialRouteName="MainScreen"
-    screenOptions={{
-      headerShown: true,
-    }}
-  >
-    <Stack.Screen name="MainScreen" component={MainScreen} />
-    <Stack.Screen name="DetailScreen" component={DetailScreen} />
-  </Stack.Navigator>
-);
+const MainStack = () => {
+  const { themeConfig } = useContext(ThemeContext);
 
-// Bottom Tab Navigator
+  return (
+    <Stack.Navigator
+      initialRouteName="MainScreen"
+      screenOptions={{
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: themeConfig.colors.card,
+          borderBottomWidth: 1,
+          borderBottomColor: themeConfig.colors.border,
+          shadowColor: "transparent",
+          elevation: 0,
+        },
+        headerTintColor: themeConfig.colors.text,
+        headerTitleStyle: {
+          fontSize: 18,
+          fontWeight: "bold",
+          textAlign: "center",
+        },
+        headerTitleAlign: "center",
+      }}
+    >
+      <Stack.Screen
+        name="MainScreen"
+        component={MainScreen}
+        options={{ title: "Thực đơn món ăn" }}
+      />
+      <Stack.Screen
+        name="DetailScreen"
+        component={DetailScreen}
+        options={{ title: "Chi tiết món ăn" }}
+      />
+    </Stack.Navigator>
+  );
+};
+
 const BottomTabNavigator = () => {
+  const { themeConfig } = useContext(ThemeContext);
+
   return (
     <Tab.Navigator
       initialRouteName="Categories"
@@ -40,47 +67,56 @@ const BottomTabNavigator = () => {
         tabBarIcon: ({ color, size }) => {
           let iconName;
           if (route.name === "Categories") {
-            iconName = "list-outline"; // Icon cho "Danh mục"
+            iconName = "list-outline";
           } else if (route.name === "Favorites") {
-            iconName = "heart-outline"; // Icon cho "Yêu thích"
+            iconName = "heart-outline";
           } else if (route.name === "Settings") {
-            iconName = "settings-outline"; // Icon cho "Cài đặt"
+            iconName = "settings-outline";
           }
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: "tomato", // Màu khi tab đang được chọn
-        tabBarInactiveTintColor: "gray", // Màu khi tab không được chọn
+        tabBarActiveTintColor: themeConfig.colors.primary,
+        tabBarInactiveTintColor: themeConfig.colors.text,
+        tabBarStyle: {
+          backgroundColor: themeConfig.colors.card,
+        },
       })}
     >
       <Tab.Screen
         name="Categories"
-        component={MainStack} // Liên kết đến Stack Navigator của "Danh mục"
-        options={{ title: "Danh mục" }}
+        component={MainStack}
+        options={{ headerShown: false }}
       />
       <Tab.Screen
         name="Favorites"
-        component={FavoritesScreen} // Liên kết đến màn hình "Yêu thích"
+        component={FavoritesScreen}
         options={{ title: "Yêu thích" }}
       />
       <Tab.Screen
         name="Settings"
-        component={SettingsScreen} // Liên kết đến màn hình "Cài đặt"
+        component={SettingsScreen}
         options={{ title: "Cài đặt" }}
       />
     </Tab.Navigator>
   );
 };
 
-// Drawer Navigator
 const App = () => {
-  const { theme } = useContext(ThemeContext); // Lấy theme từ ThemeContext
+  const { theme, themeConfig, headerShown } = useContext(ThemeContext);
 
   return (
     <NavigationContainer theme={theme === "dark" ? DarkTheme : DefaultTheme}>
       <Drawer.Navigator
         initialRouteName="Home"
         screenOptions={{
-          headerShown: true,
+          headerShown: headerShown, // Use headerShown from ThemeContext
+          drawerStyle: {
+            backgroundColor: themeConfig.colors.background,
+          },
+          drawerContentOptions: {
+            activeTintColor: themeConfig.colors.primary,
+            inactiveTintColor: themeConfig.colors.text,
+          },
         }}
       >
         <Drawer.Screen name="Home" component={BottomTabNavigator} />

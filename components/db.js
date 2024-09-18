@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import * as FileSystem from "expo-file-system";
-import * as Asset from "expo-asset";
+import { Asset } from "expo-asset";
 import * as SQLite from "expo-sqlite/legacy"; // Sử dụng thư viện expo-sqlite/legacy
 
 const useDatabase = () => {
